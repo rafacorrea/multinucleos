@@ -5,8 +5,8 @@
 //#define N 1000000
 
           
-#define Blocks 5
-#define THREADS_PER_BLOCK 2
+#define Blocks 128
+#define THREADS_PER_BLOCK 4
 
 
 __global__ void multiplicar( float *mat1, float *mat2, float *res, int n) {
