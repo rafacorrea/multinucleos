@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
 
 #define ROWS1 4
 #define COLS1 3
@@ -9,18 +10,20 @@
 
 int * multiplicar (int * mat1, int *mat2, int n)
 {
-//a = (float*)malloc( N*sizeof(float) );
     
-    int *res;
-    res =   (int*) malloc(n * n * sizeof(int));
+    int * res;
+    res = (int*) malloc(n * n * sizeof(int));
     int temp;
-    
+//#pragma omp parallel
+    #pragma omp parallel for schedule(static) shared(res)//collapse(2)
+
     for (int i = 0; i<n; i++)
     {
         for (int j = 0; j<n; j++)
         {
 
             temp = 0;
+#pragma omp critical
             for (int k = 0; k < n; k++)
             {
                 temp += mat1[i*n + k] * mat2[k*n + j];
@@ -71,13 +74,13 @@ int main (int argc, char *argv[] )
 
         for(int i = 0; i<n*n; i++)
         {
-            //mat1[i] = rand()%991 + 10;
+           // mat1[i] = rand()%991 + 10;
 		mat1[i] = i;
         }
         
         for(int i = 0; i<n*n; i++)
         {
-            //mat2[i] = rand()%991 + 10;
+           // mat2[i] = rand()%991 + 10;
 		mat2[i] = i;
             
         }
@@ -85,12 +88,13 @@ int main (int argc, char *argv[] )
         printM(mat1, n, n);
         printM(mat2, n, n);
 
+
    cudaEventCreate( &inicio );
    cudaEventCreate( &fin );
    cudaEventRecord( inicio, 0 );
-
         
         int * res = multiplicar(mat1, mat2, n);
+
 
    cudaEventRecord( fin, 0 );
    cudaEventSynchronize( fin );
@@ -103,9 +107,7 @@ int main (int argc, char *argv[] )
             printM(res, n, n);
         }
 
-
-   printf("tiempo total en ms: %f\n", tiempo);
-
+ printf("tiempo total en ms: %f\n", tiempo);
 
         
         return 0;
