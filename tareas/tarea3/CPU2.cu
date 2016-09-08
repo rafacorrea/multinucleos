@@ -2,32 +2,27 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ROWS1 4
-#define COLS1 3
-#define ROWS2 3
-#define COLS2 5
 
-int * multiplicar (int * mat1, int *mat2, int n)
+float * multiplicar (float * mat1, float *mat2, int n)
 {
-//a = (float*)malloc( N*sizeof(float) );
     
-    int *res;
-    res =   (int*) malloc(n * n * sizeof(int));
-    int temp;
-    
-    for (int i = 0; i<n; i++)
-    {
-        for (int j = 0; j<n; j++)
-        {
+    float *res; int i=0; int j=0; int k=0;
+    res =   (float*) malloc(n * n * sizeof(float));
 
-            temp = 0;
-            for (int k = 0; k < n; k++)
+
+    for (i = 0; i<n; i++)
+    {
+
+        for (j = 0; j<n; j++)
+        {
+	   res[i*n+j]=0;
+
+            for (k = 0; k < n; k++)
             {
-                temp += mat1[i*n + k] * mat2[k*n + j];
-                //printf("%d * %d\n", mat1[i*COLS1 + k], mat2[k*COLS2 + j]);
+
+ 		res[i*n+j] = (res[i*n+j]) + (mat1[i*n + k] * mat2[k*n + j]);
+
             }
-            res[i*n+j] = temp;
-            //printf("i: %d, j:%d, temp: %d\n", i,j,temp);
         }
 
     }
@@ -35,13 +30,13 @@ int * multiplicar (int * mat1, int *mat2, int n)
     return res;
 }
 
-void printM(int * data, int rows, int cols)
+void printM(float * data, int rows, int cols)
 {
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-            printf("%d ", data[i*cols+j]);
+            printf("%.0f ", data[i*cols+j]);
             
         }
         printf("\n");
@@ -59,10 +54,10 @@ int main (int argc, char *argv[] )
     else
     {
         int n = atoi(argv[1]);
-        int *mat1;
-        int *mat2;
-        mat1 = (int*) malloc(n * n * sizeof(int));
-        mat2 = (int*) malloc(n * n * sizeof(int));
+        float *mat1;
+        float *mat2;
+        mat1 = (float*) malloc(n * n * sizeof(float));
+        mat2 = (float*) malloc(n * n * sizeof(float));
         srand (time(NULL));
 
    	cudaEvent_t inicio, fin;
@@ -90,7 +85,7 @@ int main (int argc, char *argv[] )
    cudaEventRecord( inicio, 0 );
 
         
-        int * res = multiplicar(mat1, mat2, n);
+        float * res = multiplicar(mat1, mat2, n);
 
    cudaEventRecord( fin, 0 );
    cudaEventSynchronize( fin );
