@@ -1,103 +1,172 @@
-/*
- * Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
- *
- * NVIDIA Corporation and its licensors retain all intellectual property and 
- * proprietary rights in and to this software and related documentation. 
- * Any use, reproduction, disclosure, or distribution of this software 
- * and related documentation without an express license agreement from
- * NVIDIA Corporation is strictly prohibited.
- *
- * Please refer to the applicable NVIDIA end user license agreement (EULA) 
- * associated with this source code for terms and conditions that govern 
- * your use of this NVIDIA software.
- * 
- */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N   4000 //tamaño de bloques
-#define M   1000000
+#define N   5 //tamaño de bloques
+
             
 int d;
 
+
+__global__ void multiplicar( float *mat1, float *mat2, float *res, int i, int n) {
+
+  int tid = i*N+blockIdx.x; // vector index  
+  int j=0; int k=0;
+    //res =   (float*) malloc(n * n * sizeof(float));
+
+    for (i = tid; i<n; i++)
+    {
+        for (j = 0; j<n; j++)
+        {
+	   res[i*n+j]=0;
+
+            for (k = 0; k < n; k++)
+            {
+
+ 		res[i*n+j] = (res[i*n+j]) + (mat1[i*n + k] * mat2[k*n + j]);
+
+            }
+        }
+
+    }
+    
+}//Cierre de funcion
+
+/*
 __global__ void add( int *a, int *b, int *c, int i ) {
    int tid = i*N+blockIdx.x; // vector index
    if (tid < M)
       c[tid] = a[tid] + b[tid];
 }
 
-int main( void ) {
-   int *a= new int[M], *b=new int[M], *c=new int[M];
-   int *dev_a, *dev_b, *dev_c;
+*/
+
+
+void printM(float * data, int rows, int cols)
+{
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            printf("%.0f ", data[i*cols+j]);
+            
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+
+
+
+
+
+int main( int argc, char *argv[] ) {
+
+
+ if ( argc != 2 ) 
+
+    {
+
+        printf( "usage: %s N", argv[0] );
+    }
+    else
+    {
+        int n = atoi(argv[1]);
+
+
+   float *mat1= new float[n*n], *mat2=new float[n*n], *res=new float[n*n];
+   float *mat_1, *mat_2, *mat_r;
    float tiempo1, tiempo2;
    cudaEvent_t inicio1, fin1, inicio2, fin2; // para medir tiempos como con timestamp
 
-   // fill the arrays 'a' and 'b' on the CPU
-   for (int i=0; i<M; i++)
-      a[i] = b[i] = i+1;
+
 
    cudaEventCreate(&inicio1); // Se inicializan
    cudaEventCreate(&fin1);
    cudaEventRecord( inicio1, 0 ); // Se toma el tiempo de inicio
 
-   d = M / N;
+
+   srand (time(NULL));
+        
+
+   // fill the arrays 'a' and 'b' on the CPU
+   for (int i=0; i<n; i++)
+      mat1[i] = mat2[i] = i;
+
+
+ /* for(int i = 0; i<n*n; i++)
+        {
+            //mat1[i] = rand()%991 + 10;
+		mat1[i] = i;
+        }
+        
+        for(int i = 0; i<n*n; i++)
+        {
+            //mat2[i] = rand()%991 + 10;
+		mat2[i] = i;
+            
+        }
+*/
+
+
+
+   d = n / N;
    printf( "d:%d\n", d );
 
    // allocate the memory on the GPU
-   cudaMalloc( (void**)&dev_a, M * sizeof(int) );
-   cudaMalloc( (void**)&dev_b, M * sizeof(int) );
-   cudaMalloc( (void**)&dev_c, M * sizeof(int) );
+   cudaMalloc( (void**)&mat_1, n * n * sizeof(float) );
+   cudaMalloc( (void**)&mat_2, n * n * sizeof(float) );
+   cudaMalloc( (void**)&mat_r, n * n * sizeof(float) );
 
    // copy the arrays 'a' and 'b' to the GPU
-   cudaMemcpy( dev_a, a, M * sizeof(int), cudaMemcpyHostToDevice );
-   cudaMemcpy( dev_b, b, M * sizeof(int), cudaMemcpyHostToDevice );
+   cudaMemcpy( mat_1, mat1, n * n  * sizeof(float), cudaMemcpyHostToDevice );
+   cudaMemcpy( mat_2, mat2, n * n  * sizeof(float), cudaMemcpyHostToDevice );
 
    cudaEventCreate(&inicio2); // Se inicializan
    cudaEventCreate(&fin2);
    cudaEventRecord( inicio2, 0 ); // Se toma el tiempo de inicio
 
-   for (int i=0; i<d; i++)
-      add<<<N,1>>>( dev_a, dev_b, dev_c, i );
+
+    for (int i=0; i<d; i++)
+      multiplicar<<<N,1>>>( mat_1, mat_2, mat_r, i, n );
 
    cudaEventRecord( fin2, 0); // Se toma el tiempo final.
    cudaEventSynchronize( fin2 ); // Se sincroniza
    cudaEventElapsedTime( &tiempo2, inicio2, fin2 );
 
    // copy the array 'c' back from the GPU to the CPU
-   cudaMemcpy( c, dev_c, M * sizeof(int), cudaMemcpyDeviceToHost );
+   cudaMemcpy( res, mat_r, n * n  * sizeof(float), cudaMemcpyDeviceToHost );
 
    // free the memory allocated on the GPU
-   cudaFree( dev_a );
-   cudaFree( dev_b );
-   cudaFree( dev_c );
+   cudaFree( mat_1 );
+   cudaFree( mat_2 );
+   cudaFree( mat_r );
 
    cudaEventRecord( fin1, 0); // Se toma el tiempo final.
    cudaEventSynchronize( fin1 ); // Se sincroniza
    cudaEventElapsedTime( &tiempo1, inicio1, fin1 );
 
-   // display the results
-   /*for (int i=0; i<M; i++)
-       printf( "%d + %d = %d\n", a[i], b[i], c[i] );*/
 
-       for (int i=0; i<M; i++)
-       if(c[i] / a[i] != 2)
-       {
-       printf("Programa incorrecto\n");
-       break;
-       }
+ 	if (res !=0)
+        {
+	    printf("\nMatriz de Resultado\n\n");
+            printM(res, n, n);
+        }
 
 
 
-       //   printf( "%d + %d = %d\n", a[M-1], b[M-1], c[M-1] );
-
-   free(a);
-   free(b);
-   free(c);
+   free(mat1);
+   free(mat2);
+   free(res);
 
    printf("Tiempo cálculo %f ms\n", tiempo2);
    printf("Tiempo total %f ms\n", tiempo1);
 
    return 0;
-}
+  }
+
+        
+        //float * res = multiplicar(mat1, mat2, n);
+
+
+}//Cierre de main
