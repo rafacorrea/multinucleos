@@ -26,20 +26,6 @@ __global__ void multiplicar( float *mat1, float *mat2, float *res, int n) {
 }
 
 
-
-
-
-
-/*
-__global__ void add(int *a, int *b, int *c)
-{
-   int index = blockIdx.x * blockDim.x + threadIdx.x;
-   if (index < N)
-      c[index] = a[index] + b[index];
-}
-*/
-
-
 void printM(float * data, int rows, int cols)
 {
     for (int i = 0; i < rows; i++)
@@ -71,6 +57,14 @@ int main(int argc, char *argv[])
         int n = atoi(argv[1]);
 
 
+ if(n> (THREADS_PER_BLOCK * Blocks ))
+{
+   printf("\nHay que modificar el .cu  para que THREADS * Blocks sea igual o mayor a %d\n" , n);
+return 0;
+}
+
+
+
    float *mat1= new float[n*n], *mat2=new float[n*n], *res=new float[n*n];
    float *mat_1, *mat_2, *mat_r;
    float tiempo1, tiempo2;
@@ -87,23 +81,24 @@ int main(int argc, char *argv[])
         
 
    // fill the arrays 'a' and 'b' on the CPU
-   for (int i=0; i<n*n; i++)
+  /* for (int i=0; i<n*n; i++)
       mat1[i] = mat2[i] = i;
+*/
 
 
- /* for(int i = 0; i<n*n; i++)
+  for(int i = 0; i<n*n; i++)
         {
-            //mat1[i] = rand()%991 + 10;
-		mat1[i] = i;
+            mat1[i] = rand()%991 + 10;
+		
         }
         
         for(int i = 0; i<n*n; i++)
         {
-            //mat2[i] = rand()%991 + 10;
-		mat2[i] = i;
+            mat2[i] = rand()%991 + 10;
+	
             
         }
-*/
+
 
    // allocate the memory on the GPU
    cudaMalloc( (void**)&mat_1, n * n * sizeof(float) );
