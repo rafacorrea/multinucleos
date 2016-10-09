@@ -119,7 +119,7 @@ for(int y = 0; y < input.rows; y++) //recorramos las filas
   for(int y = 1; y < input.rows - 1; y++){
     for(int x = 1; x < input.cols - 1; x++){
      
-      final.at<uchar>(y,x) = resMxN[y*x+y]; // y vamos pasando los puntos.
+      final.at<uchar>(y,x) = resMxN[y*input.cols+x]; // y vamos pasando los puntos.
     }
   }
 
@@ -138,11 +138,12 @@ for(int y = 0; y < input.rows; y++) //recorramos las filas
 */
 
 
-
+	namedWindow("Input", WINDOW_NORMAL);
+	namedWindow("Output", WINDOW_NORMAL);
 
 	//Show the input and output
-	imshow("Input", final);
-
+	imshow("Input", input);
+	imshow("Output", final);
 
 
 	//Wait for key press
