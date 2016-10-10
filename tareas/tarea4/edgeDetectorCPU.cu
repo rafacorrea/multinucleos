@@ -4,6 +4,7 @@
 #include<opencv2/imgproc/imgproc.hpp>
 #include<opencv2/highgui/highgui.hpp>
 #include<cuda_runtime.h>
+#include<math.h>
 
 using namespace std;
 using namespace cv;
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
 	string imagePath;
 	
 	if(argc < 2)
+		//imagePath = "Bikesgray.jpg";
 		imagePath = "space-wallpaper_2880x1800.jpg";
   else
   	imagePath = argv[1];
@@ -65,10 +67,11 @@ int main(int argc, char *argv[])
 	//Allow the windows to resize
 	namedWindow("Input", WINDOW_NORMAL);
 
-	int  *resMxN;
+	int  *resX, *resY;
    	//masPxP = (int*) malloc(P*P*sizeof(int));
         //imaMxN = (int*) malloc(M*N*sizeof(int));
-        resMxN = (int*) malloc(input.rows*input.cols*sizeof(int));
+        resX = (int*) malloc(input.rows*input.cols*sizeof(int));
+        resY = (int*) malloc(input.rows*input.cols*sizeof(int));
 	
 
 	/*Matrices utilizadas para Prewitt*/
@@ -76,11 +79,11 @@ int main(int argc, char *argv[])
 
 	int arregloY[9] = {-1,-1,-1,0,0,0,1,1,1};
 
-	int arregloP[9];
+	//int arregloP[9];
 
 	int n=3;
 	/*Multiplicación de matrices*/
-	 for (int i = 0; i<n; i++)
+	/* for (int i = 0; i<n; i++)
 	    {
 		for (int j = 0; j<n; j++)
 		{
@@ -99,10 +102,12 @@ int main(int argc, char *argv[])
 	 printf("\n");
 	 printf("%d", arregloP[i]);
 	}
-	
+	*/
 
 	float tiempo;
-	tiempo= convolucionCPU1( arregloX, input , resMxN, input.rows, input.cols );
+	tiempo= convolucionCPU1( arregloX, input , resX, input.rows, input.cols );
+        tiempo= convolucionCPU1( arregloY, input , resY, input.rows, input.cols );
+
 
 	printf("Tiempo %f: ", tiempo);
 
@@ -114,12 +119,19 @@ for(int y = 0; y < input.rows; y++) //recorramos las filas
       final.at<uchar>(y,x) = 0.0; //punto inicial
 
 
+float sum;
+
+/*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
 
 
   for(int y = 1; y < input.rows - 1; y++){
     for(int x = 1; x < input.cols - 1; x++){
-     
-      final.at<uchar>(y,x) = resMxN[y*input.cols+x]; // y vamos pasando los puntos.
+	//sum = sqrt ( (resX[y*input.cols+x] * resX[y*input.cols+x]) + (resY[y*input.cols+x] * resY[y*input.cols+x]) );
+	//sum = sqrt(resY[y*input.cols+x]);
+	//sum = sum > 255 ? 255:sum;
+        //sum = sum < 0 ? 0 : sum;
+     // final.at<uchar>(y,x) = sum;
+      final.at<uchar>(y,x) = resX[y*input.cols+x]; // y vamos pasando los puntos.
     }
   }
 
@@ -138,11 +150,10 @@ for(int y = 0; y < input.rows; y++) //recorramos las filas
 */
 
 
-	namedWindow("Input", WINDOW_NORMAL);
-	namedWindow("Output", WINDOW_NORMAL);
-
 	//Show the input and output
+	namedWindow("Input", WINDOW_NORMAL);
 	imshow("Input", input);
+	namedWindow("Output", WINDOW_NORMAL);
 	imshow("Output", final);
 
 
