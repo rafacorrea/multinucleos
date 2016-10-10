@@ -131,6 +131,7 @@ int sum;
 	//sum = sum > 255 ? 255:sum;
         //sum = sum < 0 ? 0 : sum;
 	sum = abs(resX[y*input.cols+x])+ abs(resY[y*input.cols+x]);
+	//final.at<uchar>(y,x) = sum;
 	final.at<uchar>(y,x) = resY[y*input.cols+x];
     // final.at<uchar>(y,x) = sqrt( pow(resX[y*input.cols+x], 2) + pow(resY[y*input.cols+x], 2) );
       //final.at<uchar>(y,x) = resX[y*input.cols+x]; // y vamos pasando los puntos.
