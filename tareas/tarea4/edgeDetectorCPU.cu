@@ -39,8 +39,17 @@ float convolucionCPU1(int *a, Mat img, int *c, int N, int M)
 }
 
 
-void combinar(int *a, int *b, Mat &res)
+float combinar(int *a, int *b, Mat &res)
 {
+    cudaEvent_t cpuI, cpuF;
+    float cpuT;
+    cudaEventCreate( &cpuI );
+    cudaEventCreate( &cpuF );
+    cudaEventRecord( cpuI, 0 );
+
+    cudaEventRecord( cpuF, 0 );
+    cudaEventSynchronize( cpuF );
+    cudaEventElapsedTime( &cpuT, cpuI, cpuF);
     int sum;
 
     /*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
@@ -52,6 +61,7 @@ void combinar(int *a, int *b, Mat &res)
 	        res.at<uchar>(y,x) = sum;
     }
   }
+  return cpuT;
 }
 
 int main(int argc, char *argv[])
@@ -74,18 +84,12 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	//Create output image
-	//Mat output(input.rows, input.cols, CV_8UC1);
-
-
 	//Allow the windows to resize
 	namedWindow("Input", WINDOW_NORMAL);
 
 	int  *resX, *resY;
-   	//masPxP = (int*) malloc(P*P*sizeof(int));
-        //imaMxN = (int*) malloc(M*N*sizeof(int));
-        resX = (int*) malloc(input.rows*input.cols*sizeof(int));
-        resY = (int*) malloc(input.rows*input.cols*sizeof(int));
+    resX = (int*) malloc(input.rows*input.cols*sizeof(int));
+    resY = (int*) malloc(input.rows*input.cols*sizeof(int));
 	
 
 	/*Matrices utilizadas para Prewitt*/
@@ -97,15 +101,11 @@ int main(int argc, char *argv[])
 	int n=3;
 
 
-	float tiempo, tiempo2;
+	float tiempo, tiempo2, tiempo3;
 	tiempo= convolucionCPU1( arregloX, input , resX, input.rows, input.cols );
     tiempo2= convolucionCPU1( arregloY, input , resY, input.rows, input.cols );
 
-
-	printf("Tiempo %f: ", tiempo);
-
-
-	Mat final;
+    Mat final;
 	
 	final = input.clone(); //hagamos un clon
     for(int y = 0; y < input.rows; y++) //recorramos las filas
@@ -114,29 +114,14 @@ int main(int argc, char *argv[])
 
 
     combinar(resX, resY, final);
-    
 
-
-        /*Imprimir el valor de la matriz*/	
-/*
-
-	printf("Rows:  %d", input.rows);
-	uint8_t *myData = input.data;
-
-	int _stride = input.step;//in case cols != strides
-	for(int i=0; i <input.rows; ++i)
-	for(int j=0; j < input.cols; ++j)
-	printf("%d  ,  ", myData[ i * _stride + j]);
-*/
-
+	printf("Tiempo %f: ", tiempo + tiempo2 + tiempo3);
 
 	//Show the input and output
 	namedWindow("Input", WINDOW_NORMAL);
 	imshow("Input", input);
 	namedWindow("Output", WINDOW_NORMAL);
 	imshow("Output", final);
-
-
 
 	//Wait for key press
 	waitKey();
