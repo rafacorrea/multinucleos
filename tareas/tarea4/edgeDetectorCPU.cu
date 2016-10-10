@@ -11,6 +11,7 @@ using namespace cv;
 
 //int *b
 
+
 void sumaEulerCPU1(int *a, Mat img, int *c, int N, int M)
 {
    // Se calculan valores sin considerar la orilla para3x3.
@@ -38,7 +39,20 @@ float convolucionCPU1(int *a, Mat img, int *c, int N, int M)
 }
 
 
+void combinar(int *a, int *b, Mat &res)
+{
+    int sum;
 
+    /*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
+    for(int y = 1; y < res.rows - 1; y++){
+        for(int x = 1; x < res.cols - 1; x++){
+	        sum = abs(a[y*res.cols+x])+ abs(b[y*res.cols+x]);
+	        sum = sum > 255 ? 255:sum;
+            sum = sum < 0 ? 0 : sum;
+	        res.at<uchar>(y,x) = sum;
+    }
+  }
+}
 
 int main(int argc, char *argv[])
 {
@@ -79,64 +93,28 @@ int main(int argc, char *argv[])
 
 	int arregloY[9] = {-1,-1,-1,0,0,0,1,1,1};
 
-	//int arregloP[9];
 
 	int n=3;
-	/*Multiplicación de matrices*/
-	/* for (int i = 0; i<n; i++)
-	    {
-		for (int j = 0; j<n; j++)
-		{
-		   arregloP[i*n+j]=0;
 
-		    for (int k = 0; k < n; k++)
-		    {
-	 		arregloP[i*n+j] = (arregloP[i*n+j]) + (arregloX[i*n + k] * arregloY[k*n + j]);
-		    }
-		}
-	    }
-
-	for(int i=0; i<3*3; ++i)
-	{
-	 if(i%3 == 0)
-	 printf("\n");
-	 printf("%d", arregloP[i]);
-	}
-	*/
 
 	float tiempo, tiempo2;
 	tiempo= convolucionCPU1( arregloX, input , resX, input.rows, input.cols );
-        tiempo2= convolucionCPU1( arregloY, input , resY, input.rows, input.cols );
+    tiempo2= convolucionCPU1( arregloY, input , resY, input.rows, input.cols );
 
 
 	printf("Tiempo %f: ", tiempo);
 
 
 	Mat final;
+	
 	final = input.clone(); //hagamos un clon
-for(int y = 0; y < input.rows; y++) //recorramos las filas
-    for(int x = 0; x < input.cols; x++) //recorramos las columnas
-      final.at<uchar>(y,x) = 0.0; //punto inicial
+    for(int y = 0; y < input.rows; y++) //recorramos las filas
+        for(int x = 0; x < input.cols; x++) //recorramos las columnas
+          final.at<uchar>(y,x) = 0.0; //punto inicial
 
 
-int sum;
-
-/*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
-
-
-  for(int y = 1; y < input.rows - 1; y++){
-    for(int x = 1; x < input.cols - 1; x++){
-	//sum = sqrt ( (resX[y*input.cols+x] * resX[y*input.cols+x]) + (resY[y*input.cols+x] * resY[y*input.cols+x]) );
-	//sum = sqrt( pow(resY[y*input.cols+x], 2) );
-	//sum = sum > 255 ? 255:sum;
-        //sum = sum < 0 ? 0 : sum;
-	sum = abs(resX[y*input.cols+x])+ abs(resY[y*input.cols+x]);
-	//final.at<uchar>(y,x) = sum;
-	final.at<uchar>(y,x) = resY[y*input.cols+x];
-    // final.at<uchar>(y,x) = sqrt( pow(resX[y*input.cols+x], 2) + pow(resY[y*input.cols+x], 2) );
-      //final.at<uchar>(y,x) = resX[y*input.cols+x]; // y vamos pasando los puntos.
-    }
-  }
+    combinar(resX, resY, final);
+    
 
 
         /*Imprimir el valor de la matriz*/	
@@ -157,6 +135,7 @@ int sum;
 	imshow("Input", input);
 	namedWindow("Output", WINDOW_NORMAL);
 	imshow("Output", final);
+
 
 
 	//Wait for key press
