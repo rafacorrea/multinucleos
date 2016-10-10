@@ -46,21 +46,23 @@ float combinar(int *a, int *b, Mat &res)
     cudaEventCreate( &cpuI );
     cudaEventCreate( &cpuF );
     cudaEventRecord( cpuI, 0 );
+ int sum;
+  /*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
+    for(int y = 1; y < res.rows - 1; y++){
+        for(int x = 1; x < res.cols - 1; x++){
+	        sum = abs(a[y*res.cols+x]) + abs(b[x*res.cols+y]);
+	        sum = sum > 255 ? 255:sum;
+                sum = sum < 0 ? 0 : sum;
+	        res.at<uchar>(y,x) = b[y*res.cols+x];
+    }
+  }
 
     cudaEventRecord( cpuF, 0 );
     cudaEventSynchronize( cpuF );
     cudaEventElapsedTime( &cpuT, cpuI, cpuF);
-    int sum;
+   
 
-    /*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
-    for(int y = 1; y < res.rows - 1; y++){
-        for(int x = 1; x < res.cols - 1; x++){
-	        sum = abs(a[y*res.cols+x])+ abs(b[y*res.cols+x]);
-	        sum = sum > 255 ? 255:sum;
-            sum = sum < 0 ? 0 : sum;
-	        res.at<uchar>(y,x) = sum;
-    }
-  }
+  
   return cpuT;
 }
 
@@ -84,8 +86,6 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	//Allow the windows to resize
-	namedWindow("Input", WINDOW_NORMAL);
 
 	int  *resX, *resY;
     resX = (int*) malloc(input.rows*input.cols*sizeof(int));
