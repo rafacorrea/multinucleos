@@ -45,8 +45,8 @@ int main(int argc, char *argv[])
 	string imagePath;
 	
 	if(argc < 2)
-		//imagePath = "Bikesgray.jpg";
-		imagePath = "space-wallpaper_2880x1800.jpg";
+		imagePath = "test.JPG";
+		//imagePath = "space-wallpaper_2880x1800.jpg";
   else
   	imagePath = argv[1];
   	
@@ -104,9 +104,9 @@ int main(int argc, char *argv[])
 	}
 	*/
 
-	float tiempo;
+	float tiempo, tiempo2;
 	tiempo= convolucionCPU1( arregloX, input , resX, input.rows, input.cols );
-        tiempo= convolucionCPU1( arregloY, input , resY, input.rows, input.cols );
+        tiempo2= convolucionCPU1( arregloY, input , resY, input.rows, input.cols );
 
 
 	printf("Tiempo %f: ", tiempo);
@@ -119,7 +119,7 @@ for(int y = 0; y < input.rows; y++) //recorramos las filas
       final.at<uchar>(y,x) = 0.0; //punto inicial
 
 
-float sum;
+int sum;
 
 /*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
 
@@ -127,14 +127,15 @@ float sum;
   for(int y = 1; y < input.rows - 1; y++){
     for(int x = 1; x < input.cols - 1; x++){
 	//sum = sqrt ( (resX[y*input.cols+x] * resX[y*input.cols+x]) + (resY[y*input.cols+x] * resY[y*input.cols+x]) );
-	//sum = sqrt(resY[y*input.cols+x]);
+	//sum = sqrt( pow(resY[y*input.cols+x], 2) );
 	//sum = sum > 255 ? 255:sum;
         //sum = sum < 0 ? 0 : sum;
-     // final.at<uchar>(y,x) = sum;
-      final.at<uchar>(y,x) = resX[y*input.cols+x]; // y vamos pasando los puntos.
+	sum = abs(resX[y*input.cols+x])+ abs(resY[y*input.cols+x]);
+	final.at<uchar>(y,x) = resY[y*input.cols+x];
+    // final.at<uchar>(y,x) = sqrt( pow(resX[y*input.cols+x], 2) + pow(resY[y*input.cols+x], 2) );
+      //final.at<uchar>(y,x) = resX[y*input.cols+x]; // y vamos pasando los puntos.
     }
   }
-
 
 
         /*Imprimir el valor de la matriz*/	
