@@ -9,9 +9,6 @@
 using namespace std;
 using namespace cv;
 
-//int *b
-
-
 void sumaEulerCPU1(int *a, Mat img, int *c, int N, int M)
 {
    // Se calculan valores sin considerar la orilla para3x3.
@@ -38,7 +35,7 @@ float convolucionCPU1(int *a, Mat img, int *c, int N, int M)
    return cpuT;
 }
 
-
+/*Función para combinar las 2 matrices X y Y*/
 float combinar(int *a, int *b, Mat &res)
 {
     cudaEvent_t cpuI, cpuF;
@@ -50,10 +47,11 @@ float combinar(int *a, int *b, Mat &res)
   /*Se tienen las 2 matrices y se juntan para formar la imagen final en base al algoritmo de PREWITT*/
     for(int y = 1; y < res.rows - 1; y++){
         for(int x = 1; x < res.cols - 1; x++){
-	        sum = abs(a[y*res.cols+x]) + abs(b[x*res.cols+y]);
+	        sum = abs(a[y*res.cols+x]) + abs(b[y*res.cols+x]);
 	        sum = sum > 255 ? 255:sum;
                 sum = sum < 0 ? 0 : sum;
 	        res.at<uchar>(y,x) = b[y*res.cols+x];
+		//res.at<uchar>(y,x) = sum; //Esto es lo que debería funcionar pero por alguna razón saca la pantalla negra
     }
   }
 
@@ -86,7 +84,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-
+/*Se inicializan los apuntadores de las matrices*/
 	int  *resX, *resY;
     resX = (int*) malloc(input.rows*input.cols*sizeof(int));
     resY = (int*) malloc(input.rows*input.cols*sizeof(int));
@@ -96,10 +94,6 @@ int main(int argc, char *argv[])
 	int arregloX[9] = {-1,0,1,-1,0,1,-1,0,1};
 
 	int arregloY[9] = {-1,-1,-1,0,0,0,1,1,1};
-
-
-	int n=3;
-
 
 	float tiempo, tiempo2, tiempo3;
 	tiempo= convolucionCPU1( arregloX, input , resX, input.rows, input.cols );
@@ -115,7 +109,7 @@ int main(int argc, char *argv[])
 
     tiempo3 = combinar(resX, resY, final);
 
-	printf("Tiempo %f: ", tiempo + tiempo2 + tiempo3);
+	printf("Tiempo:  %f \n", tiempo + tiempo2 + tiempo3);
 
 	//Show the input and output
 	namedWindow("Input", WINDOW_NORMAL);
