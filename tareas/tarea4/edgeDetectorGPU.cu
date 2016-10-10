@@ -82,7 +82,7 @@ void prewittEdge(const Mat &input, Mat &output)
 	dim3 bloques((input.rows - 2)/Q + 1, (input.cols - 2)/Q + 1);
     dim3 threads(Q, Q);
     
-	convolucionGPU<<<bloques,threads>>>(d_mask1, d_mask2, d_input, d_output, input.rows, input.cols);
+	convolucionGPU<<<bloques,threads>>>(d_mask1, d_mask2, d_input, d_output, input.cols, input.rows);
 	//Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
 
