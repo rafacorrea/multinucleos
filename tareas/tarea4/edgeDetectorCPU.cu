@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	string imagePath;
 	
 	if(argc < 2)
-		imagePath = "test.JPG";
+		imagePath = "megaPixel.jpg";
 		//imagePath = "space-wallpaper_2880x1800.jpg";
   else
   	imagePath = argv[1];
