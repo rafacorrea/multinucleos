@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
           final.at<uchar>(y,x) = 0.0; //punto inicial
 
 
-    combinar(resX, resY, final);
+    tiempo3 = combinar(resX, resY, final);
 
 	printf("Tiempo %f: ", tiempo + tiempo2 + tiempo3);
 
