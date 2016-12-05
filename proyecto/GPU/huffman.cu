@@ -15,6 +15,7 @@
 #define N 32
 #define M 4
 
+#define MAX_BLOCKS 65535
 #define THREADS_PER_BLOCK 128
 #define WARP_SIZE 32
 
@@ -40,6 +41,7 @@ __global__ void encode_byte_stream(char * string, code * code_values, char * res
 	if(i < f_size)
 	{
 	    my_strcpy(res + offset[i], code_values[string[i]].path);
+            printf("hola\n");
 	}
 	
 	
@@ -188,7 +190,8 @@ int main(int argc, char *argv[]) {
    //thrust::device_delete(d_offset2);
    int blocks;
    blocks = ceil((float)f_size/THREADS_PER_BLOCK);
-   
+
+printf("blocks: %d\n", blocks);
    encode_byte_stream<<<blocks,THREADS_PER_BLOCK>>>(d_string, d_code_values, d_encoded_byte_stream, d_offset2, f_size);
    cudaFree(d_string);
    cudaFree(d_code_values);
