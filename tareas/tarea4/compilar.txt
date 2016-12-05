@@ -1,0 +1,16 @@
+CPU
+nvcc -o image_test edgeDetectorCPU.cu -lopencv_core -lopencv_highgui -lopencv_imgproc -w
+
+Ejecución
+
+./image_test megaPixel.jpg
+
+
+GPU
+
+nvcc -o image_test edgeDetectorGPU.cu -lopencv_core -lopencv_highgui -lopencv_imgproc -w
+
+Ejeción
+
+./image_test megaPixel.jpg 992 21574
+
