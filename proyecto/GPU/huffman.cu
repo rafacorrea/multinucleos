@@ -195,8 +195,8 @@ int main(int argc, char *argv[]) {
    encode_byte_stream<<<blocks,THREADS_PER_BLOCK>>>(d_string, d_code_values, d_encoded_byte_stream, d_offset2, f_size);
    cudaFree(d_string);
    cudaFree(d_code_values);
-   d_offset.clear();
-   d_offset.shrink_to_fit();
+   //d_offset.clear();
+  // d_offset.shrink_to_fit();
    
    //cudaFree(d_offset2);
    

@@ -2,7 +2,7 @@
 #include <stdlib.h> 
 #include <string.h>  
 
-#include "tree_huff.h"
+#include "tree_huff.cuh"
 
 struct node *generate_tree(int freq[MAX_CHARS]) {
 
