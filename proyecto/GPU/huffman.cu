@@ -39,7 +39,6 @@ __global__ void encode_byte_stream(char * string, code * code_values, char * res
 	int i = blockIdx.x *blockDim.x + threadIdx.x;
 	if(i < f_size)
 	{
-	    
 	    my_strcpy(res + offset[i], code_values[string[i]].path);
 	}
 	
@@ -64,6 +63,7 @@ __global__ void compressed_bit_stream(char * encoded_byte_stream, unsigned char 
 	}
 }
 int main(int argc, char *argv[]) {
+
 
    FILE *file_in, *file_out;
    int freq[MAX_CHARS] = {0}, c = 0, count = 0, num_bytes = 0, ret = 0;
@@ -176,9 +176,6 @@ int main(int argc, char *argv[]) {
       last += 8-(last%8);
    }
 
-   int * d_offset2 = thrust::raw_pointer_cast( d_offset.data());
-   
-   
    char * d_encoded_byte_stream;
    char * encoded_byte_stream = (char *)malloc(sizeof(char) * last);
    cudaMalloc<char>(&d_encoded_byte_stream, sizeof(char)*last);
@@ -187,7 +184,7 @@ int main(int argc, char *argv[]) {
    cudaMalloc<code>(&d_code_values, sizeof(code)*MAX_CHARS);   
    cudaMemcpy(d_code_values, code_values, MAX_CHARS*sizeof(code), cudaMemcpyHostToDevice );   
    
-   
+   int * d_offset2 = thrust::raw_pointer_cast( &d_offset[0] );
    //thrust::device_delete(d_offset2);
    int blocks;
    blocks = ceil((float)f_size/THREADS_PER_BLOCK);
@@ -195,9 +192,6 @@ int main(int argc, char *argv[]) {
    encode_byte_stream<<<blocks,THREADS_PER_BLOCK>>>(d_string, d_code_values, d_encoded_byte_stream, d_offset2, f_size);
    cudaFree(d_string);
    cudaFree(d_code_values);
-   //d_offset.clear();
-  // d_offset.shrink_to_fit();
-   
    //cudaFree(d_offset2);
    
    cudaMemcpy(encoded_byte_stream, d_encoded_byte_stream, last*sizeof(char), cudaMemcpyDeviceToHost);
