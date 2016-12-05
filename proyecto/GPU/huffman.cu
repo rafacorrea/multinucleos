@@ -41,7 +41,7 @@ __global__ void encode_byte_stream(char * string, code * code_values, char * res
 	if(i < f_size)
 	{
 	    my_strcpy(res + offset[i], code_values[string[i]].path);
-            printf("hola\n");
+            //printf("hola\n");
 	}
 	
 	
